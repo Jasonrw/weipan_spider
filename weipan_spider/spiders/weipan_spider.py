@@ -27,5 +27,9 @@ class WeipanSpider(scrapy.spider):
             html_txt = response.body.decode("utf-8","ignore")
             url = response.url
             hxs = Selector(text=html_txt)
+            items = hxs.xpath('//table[@id="search_table"]/tbody/tr/')
+            if items:
+                for item in items:
+
         except Exception,e:
             raise
