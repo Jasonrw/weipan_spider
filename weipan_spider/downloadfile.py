@@ -1,35 +1,45 @@
 # -*- coding: utf-8 -*-
 #chekc in
 __author__ = 'Min'
-import urllib
 import urllib2
-import string
-from scrapy.selector import HtmlXPathSelector
 from scrapy.selector import Selector
+from scrapy.http import Request
 from pprint import pprint
-#from urlgrabber.keepalive import HTTPHandler
 from keepalive import HTTPHandler
 import codecs
 import json
 from Weipan_Book import WeipanBook
 from StringIO import StringIO
 import gzip
-import time
 from datetime import datetime, time
 from scrapy import log
-class WeipanSpider:
+class WeipanSpiderUtil:
     query_prefix='http://vdisk.weibo.com/search/?type=public&keyword='
     def get_utc_seconds(self):
         utcnow = datetime.utcnow()
-        midnight_utc = datetime.combine(utcnow.date(), time(0))
-        delta = utcnow - midnight_utc
-        return delta.total_seconds()
+        ep_time = datetime.strptime('19700101', "%Y%m%d")
+        delta = utcnow - ep_time
+        return int(delta.total_seconds())
+
 
     def make_basic_request(self,url):
         keepalive_handler = HTTPHandler()
         opener = urllib2.build_opener(keepalive_handler)
         urllib2.install_opener(opener)
-        request = urllib2.Request(url)
+        request = Request(url)
+        request.add_header('Host', 'vdisk.weibo.com')
+        request.add_header('Connection', 'keep-alive')
+        request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36')
+        request.add_header('Accept-Encoding','gzip, deflate, sdch')
+        request.add_header('Accept-Language','en-US,en;q=0.8,zh-CN;q=0.6')
+        return request
+
+    def make_scrapy_basic_request(self,url):
+        keepalive_handler = HTTPHandler()
+        opener = urllib2.build_opener(keepalive_handler)
+        urllib2.install_opener(opener)
+
+        request = Request(url)
         request.add_header('Host', 'vdisk.weibo.com')
         request.add_header('Connection', 'keep-alive')
         request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36')
@@ -59,7 +69,7 @@ class WeipanSpider:
         keepalive_handler = HTTPHandler()
         opener = urllib2.build_opener(keepalive_handler)
         urllib2.install_opener(opener)
-        url='http://vdisk.weibo.com/api/weipan/fileopsStatCount?link=s-WAggO9Rbafb&ops=download&_=1427550931372'
+        #url='http://vdisk.weibo.com/api/weipan/fileopsStatCount?link=s-WAggO9Rbafb&ops=download&_=1427550931372'
         request = urllib2.Request(url)
         request.add_header('Host', 'vdisk.weibo.com')
         request.add_header('Connection', 'keep-alive')
@@ -83,8 +93,11 @@ class WeipanSpider:
         return ''
 
     def download_file(self,url,filename=''):
+        log.msg('Start to download '+filename+' url: '+url)
         download_request = self.make_request(url)
         response = urllib2.urlopen(download_request)
+        start_time = datetime.now()
+        filesize = 0
         if response:
             localfile = open(filename,'wb')
             while True:
@@ -92,8 +105,13 @@ class WeipanSpider:
                 if not data:
                     break
                 localfile.write(data)
+                filesize += len(data)
             response.close()
             localfile.close()
+        end_time = datetime.now()
+        elapsed_secs = end_time - start_time
+        summary = ' Size: '+str(filesize)+' time cost: '+str(elapsed_secs)
+        log.msg('Complete download task: '+filename+summary+' url: '+url)
 
     def get_response(self, request):
         response = urllib2.urlopen(request)
@@ -139,7 +157,7 @@ class WeipanSpider:
 
 if __name__ == "__main__":
     print 'start test'
-    spider = WeipanSpider()
+    spider = WeipanSpiderUtil()
     spider.download_book(u'计算几何')
     #spider.download_book('test')
 

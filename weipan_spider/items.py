@@ -15,4 +15,17 @@ class WeipanSpiderItem(scrapy.Item):
     owner = Field()
     filesize = Field()
     downloads = Field()
+    def __str__(self):
+        return ""
+
+class DownloadItem(scrapy.Item):
+    url = Field()
+    title = Field()
+    type = Field()
+    mime_type = Field()
+    size = Field()
+    copy_ref = Field()
+    count_download = Field()
+    md5 = Field()
+    modified = Field()
     pass

@@ -8,10 +8,14 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
+
 BOT_NAME = 'weipan_spider'
 
 SPIDER_MODULES = ['weipan_spider.spiders']
 NEWSPIDER_MODULE = 'weipan_spider.spiders'
+ITEM_PIPELINES = ['weipan_spider.pipelines.DownloadFilePipeline']
+DOWNLOAD_DIR='./data/'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'weipan_spider (+http://www.yourdomain.com)'
