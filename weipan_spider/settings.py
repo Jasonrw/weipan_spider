@@ -14,8 +14,12 @@ BOT_NAME = 'weipan_spider'
 SPIDER_MODULES = ['weipan_spider.spiders']
 NEWSPIDER_MODULE = 'weipan_spider.spiders'
 ITEM_PIPELINES = ['weipan_spider.pipelines.DownloadFilePipeline']
+
+#dir to store downloaded ebooks
 DOWNLOAD_DIR='./data/'
 
+#input task file
+INPUT_TASK_FILE='./task/task.txt'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'weipan_spider (+http://www.yourdomain.com)'

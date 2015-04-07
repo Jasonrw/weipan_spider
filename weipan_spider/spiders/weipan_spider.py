@@ -11,7 +11,6 @@ import re
 import math
 import urllib
 from scrapy import log
-#from ..items import Book #this is the way to import code from parent directory
 from ..Weipan_Book import WeipanBook
 from ..downloadfile import WeipanSpiderUtil
 from ..items import DownloadItem
@@ -21,8 +20,10 @@ import os
 #set default encoding
 import sys
 import time
-#import pprint
+import codecs
 from pprint import pprint
+from ..resource_mgr import resource_mgr
+INPUT_TASK_FILE='./task/task.txt'
 
 class WeipanSpider(scrapy.Spider):
     name = "weipanspider"
@@ -31,23 +32,29 @@ class WeipanSpider(scrapy.Spider):
     spider_util = WeipanSpiderUtil()
 
     def __init__(self):
-        query_list = [u'计算几何',u'算法导论']
+        log.msg('Start to initialize input task: '+INPUT_TASK_FILE)
+        #taskfile=codecs.open(INPUT_TASK_FILE,mode='r',encoding='utf-8')
+        taskfile=codecs.open(INPUT_TASK_FILE)
+        query_list=taskfile.readlines()
+        #query_list = [u'计算几何',u'算法导论']
         for query in query_list:
-            title = urllib2.quote(query.encode(encoding='utf-8'))
+            query=query.strip('\n\r\s\t')
+            title = urllib2.quote(query)
             query_url='http://vdisk.weibo.com/search/?type=public&keyword='+title
             self.start_urls.append(query_url)
         pprint(self.start_urls)
+        taskfile.close()
+
+    def parse_cookie(self,headers):
+        cookie_list = headers.getlist('Set-Cookie')
+        for cookie_str in cookie_list:
+            resource_mgr.cookie_jar.add_cookie_str(cookie_str)
 
     def parse(self,response):
-        title=u'计算几何'
-        title = urllib2.quote(title.encode(encoding='utf-8'))
-        query_url='http://vdisk.weibo.com/search/?type=public&keyword='+title
-        yield Request(url=query_url,callback=self.parse_search_results)
-
-    def parse_search_results(self,response):
         try:
             html_txt = response.body.decode("utf-8","ignore")
             url = response.url
+            self.parse_cookie(response.headers)
             hxs = Selector(text=html_txt)
             items = hxs.xpath('//table[@id="search_table"]/tbody/tr')
             if items:
@@ -84,6 +91,8 @@ class WeipanSpider(scrapy.Spider):
                    'X-Requested-With':'XMLHttpRequest',
                    'Referer':'http://vdisk.weibo.com/search/?type=public&keyword=%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95',
                    }
+        return Request(url,callback=self.get_file_download_url,headers=req_header)
+        '''
         req_cookie = {
             'saeut':'128.199.199.160.1423838665227899',
             'SINAGLOBAL':'611836786847.5616.1423838696977',
@@ -101,20 +110,25 @@ class WeipanSpider(scrapy.Spider):
             '__utmz':'18712062.1427513634.9.3.utmcsr=login.sina.com.cn|utmccn=(referral)|utmcmd=referral|utmcct=/crossdomain2.php'
         }
         return Request(url,callback=self.get_file_download_url,headers=req_header,cookies=req_cookie)
+        '''
+
 
     def get_file_download_url(self,response):
         content = json.loads(response.body,encoding='utf-8')
+        self.parse_cookie(response.headers)
+
         if content and 'download_list' in content and len(content['download_list'])>1:
             download_url=content['download_list'][1]
             item = DownloadItem()
             item['url'] = download_url
             item['title']=content['title']
             item['type']=content['type']
-            item['size']=content['size']
+            item['size']=content['bytes']
             item['mime_type']=content['mime_type']
             item['modified']=content['modified']
             item['md5']=content['md5']
             item['count_download']=content['count_download']
+            item['copy_ref']=content['copy_ref']
             yield item
             #return download_url
             #print 'Download url: ',download_url
