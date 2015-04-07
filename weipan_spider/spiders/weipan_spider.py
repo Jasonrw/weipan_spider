@@ -91,7 +91,7 @@ class WeipanSpider(scrapy.Spider):
                    'X-Requested-With':'XMLHttpRequest',
                    'Referer':'http://vdisk.weibo.com/search/?type=public&keyword=%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95',
                    }
-        return Request(url,callback=self.get_file_download_url,headers=req_header)
+        return Request(url,callback=self.get_file_download_url,headers=req_header,cookies=resource_mgr.cookie_jar.get_cookie_str())
         '''
         req_cookie = {
             'saeut':'128.199.199.160.1423838665227899',

@@ -100,7 +100,11 @@ class WeipanSpiderUtil:
         log.msg('Start to download '+filename+' url: '+url)
         download_request = self.make_request(url)
         #download_request.add_header()
-        response = urllib2.urlopen(download_request)
+
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor())
+        #response = opener.open('http://www.bad.org.uk')
+        #response = urllib2.urlopen(download_request)
+        response = opener.open(download_request)
         start_time = datetime.now()
         filesize = 0
         if response:
