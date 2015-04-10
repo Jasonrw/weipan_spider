@@ -14,6 +14,7 @@ import gzip
 from datetime import datetime, time
 from scrapy import log
 from resource_mgr import resource_mgr
+import requests
 
 class WeipanSpiderUtil:
     query_prefix='http://vdisk.weibo.com/search/?type=public&keyword='
@@ -97,6 +98,16 @@ class WeipanSpiderUtil:
         return ''
 
     def download_file(self,url,filename=''):
+        log.msg('Start to download '+filename+' url: '+url)
+        r = requests.get(url, stream=True)
+        with open(filename, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+                    f.flush()
+        return filename
+
+    def download_file_v1(self,url,filename=''):
         log.msg('Start to download '+filename+' url: '+url)
         download_request = self.make_request(url)
         #download_request.add_header()

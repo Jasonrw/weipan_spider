@@ -33,16 +33,15 @@ class WeipanSpider(scrapy.Spider):
 
     def __init__(self):
         log.msg('Start to initialize input task: '+INPUT_TASK_FILE)
-        #taskfile=codecs.open(INPUT_TASK_FILE,mode='r',encoding='utf-8')
-        taskfile=codecs.open(INPUT_TASK_FILE)
+        taskfile=codecs.open(INPUT_TASK_FILE,mode='r',encoding='utf-8')
+        #taskfile=codecs.open(INPUT_TASK_FILE)
         query_list=taskfile.readlines()
         #query_list = [u'计算几何',u'算法导论']
         for query in query_list:
-            query=query.strip('\n\r\s\t')
+            query=query.strip('\n\r\s\t').encode('utf-8')
             title = urllib2.quote(query)
             query_url='http://vdisk.weibo.com/search/?type=public&keyword='+title
             self.start_urls.append(query_url)
-        pprint(self.start_urls)
         taskfile.close()
 
     def parse_cookie(self,headers):
@@ -91,7 +90,8 @@ class WeipanSpider(scrapy.Spider):
                    'X-Requested-With':'XMLHttpRequest',
                    'Referer':'http://vdisk.weibo.com/search/?type=public&keyword=%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95',
                    }
-        return Request(url,callback=self.get_file_download_url,headers=req_header,cookies=resource_mgr.cookie_jar.get_cookie_str())
+        #return Request(url,callback=self.get_file_download_url,headers=req_header,cookies=resource_mgr.cookie_jar.cookies)
+        return Request(url,callback=self.get_file_download_url,headers=req_header)
         '''
         req_cookie = {
             'saeut':'128.199.199.160.1423838665227899',
