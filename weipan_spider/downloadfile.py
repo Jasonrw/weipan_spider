@@ -15,7 +15,8 @@ from datetime import datetime, time
 from scrapy import log
 from resource_mgr import resource_mgr
 import requests
-
+import os.path
+import os.path
 class WeipanSpiderUtil:
     query_prefix='http://vdisk.weibo.com/search/?type=public&keyword='
     def get_utc_seconds(self):
