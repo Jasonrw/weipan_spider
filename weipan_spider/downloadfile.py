@@ -84,8 +84,8 @@ class WeipanSpiderUtil:
         #request.add_header('Referer','http://vdisk.weibo.com/search/?type=public&keyword=%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95')
         request.add_header('Accept-Encoding','gzip, deflate, sdch')
         request.add_header('Accept-Language','en-US,en;q=0.8,zh-CN;q=0.6')
-        cookie_str = resource_mgr.cookie_jar.get_cookie_str()
-        request.add_header('Cookie',cookie_str)
+        #cookie_str = resource_mgr.cookie_jar.get_cookie_str()
+        #request.add_header('Cookie',cookie_str)
         #request.add_header('Cookie','saeut=128.199.199.160.1423838665227899; SINAGLOBAL=611836786847.5616.1423838696977; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WW6VS44SKDOE03F.DpSS6my5JpX5KMt; SUHB=0WGMgclYKdPFCr; UOR=www.thunderex.com,widget.weibo.com,login.sina.com.cn; CNZZDATA3212592=cnzz_eid%3D1230030116-1423837401-null%26ntime%3D1427547320; _s_tentry=-; Apache=2748549464158.714.1427550861344; ULV=1427550861361:9:7:4:2748549464158.714.1427550861344:1427513633822; __utmt=1; __utma=18712062.314646581.1423838697.1427513634.1427550862.10; __utmb=18712062.1.10.1427550862; __utmc=18712062; __utmz=18712062.1427513634.9.3.utmcsr=login.sina.com.cn|utmccn=(referral)|utmcmd=referral|utmcct=/crossdomain2.php')
         return request
 
