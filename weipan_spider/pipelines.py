@@ -25,10 +25,10 @@ class DownloadFilePipeline(object):
 
     def process_item(self, item, spider):
         if item['md5'] not in self.fingerprints:
-            localfilename = settings.DOWNLOAD_DIR + item['copy_ref']
+            localfilename = settings.DOWNLOAD_DIR + item['title']
             if not os.path.isfile(localfilename):
                 self.util.download_file(item['url'],filename=localfilename)
-            self.fingerprints[item['md5']] = item['copy_ref']
+            self.fingerprints[item['md5']] = item['title']
         else:
             item['copy_ref'] = self.fingerprints[item['md5']]
         line = json.dumps(dict(item), ensure_ascii=False) + "\n"

@@ -21,6 +21,7 @@ import os
 import sys
 import time
 import codecs
+import re
 from pprint import pprint
 from ..resource_mgr import resource_mgr
 INPUT_TASK_FILE='./task/task.txt'
@@ -52,6 +53,8 @@ class WeipanSpider(scrapy.Spider):
     def parse(self,response):
         try:
             html_txt = response.body.decode("utf-8","ignore")
+            sign = re.search("var SIGN = \'(.+)\';",html_txt).group(1)
+            #print sign
             url = response.url
             self.parse_cookie(response.headers)
             hxs = Selector(text=html_txt)
@@ -73,14 +76,14 @@ class WeipanSpider(scrapy.Spider):
                     #file_url = self.get_file_download_url(resource_id)
                     #book['download_url'] = file_url
                     #pprint(book)
-                    request = self.make_resourceid_request(resource_id)
+                    request = self.make_resourceid_request(resource_id,sign)
                     yield request
         except Exception,e:
             raise
 
-    def make_resourceid_request(self,resource_id):
+    def make_resourceid_request(self,resource_id, sign):
         url='http://vdisk.weibo.com/api/weipan/fileopsStatCount?link='\
-            +str(resource_id)+'&ops=download&_='+str(self.spider_util.get_utc_seconds())
+            +str(resource_id)+'&ops=download&wpSign='+sign+'&_='+str(self.spider_util.get_utc_seconds())
         req_header = {'Host':'vdisk.weibo.com',
                    'Connection':'keep-alive',
                    'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.101 Safari/537.36',
@@ -91,27 +94,8 @@ class WeipanSpider(scrapy.Spider):
                    'Referer':'http://vdisk.weibo.com/search/?type=public&keyword=%E8%AE%A1%E7%AE%97%E5%87%A0%E4%BD%95',
                    }
         #return Request(url,callback=self.get_file_download_url,headers=req_header,cookies=resource_mgr.cookie_jar.cookies)
+        print 'Send Request: '+url
         return Request(url,callback=self.get_file_download_url,headers=req_header)
-        '''
-        req_cookie = {
-            'saeut':'128.199.199.160.1423838665227899',
-            'SINAGLOBAL':'611836786847.5616.1423838696977',
-            'SUBP':'0033WrSXqPxfM725Ws9jqgMF55529P9D9WW6VS44SKDOE03F.DpSS6my5JpX5KMt',
-            'SUHB':'0WGMgclYKdPFCr',
-            'UOR':'www.thunderex.com,widget.weibo.com,login.sina.com.cn',
-            'CNZZDATA3212592':'cnzz_eid%3D1230030116-1423837401-null%26ntime%3D1427547320',
-            ' _s_tentry':'-',
-            'Apache':'2748549464158.714.1427550861344',
-            'ULV':'1427550861361:9:7:4:2748549464158.714.1427550861344:1427513633822',
-            '__utmt':'1',
-            '__utma':'18712062.314646581.1423838697.1427513634.1427550862.10',
-            '__utmb':'18712062.1.10.1427550862',
-            '__utmc':'18712062',
-            '__utmz':'18712062.1427513634.9.3.utmcsr=login.sina.com.cn|utmccn=(referral)|utmcmd=referral|utmcct=/crossdomain2.php'
-        }
-        return Request(url,callback=self.get_file_download_url,headers=req_header,cookies=req_cookie)
-        '''
-
 
     def get_file_download_url(self,response):
         content = json.loads(response.body,encoding='utf-8')
@@ -119,6 +103,7 @@ class WeipanSpider(scrapy.Spider):
 
         if content and 'download_list' in content and len(content['download_list'])>1:
             download_url=content['download_list'][1]
+            print 'Download Url: '+download_url
             item = DownloadItem()
             item['url'] = download_url
             item['title']=content['title']
