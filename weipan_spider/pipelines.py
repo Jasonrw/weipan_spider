@@ -11,6 +11,7 @@ import codecs
 import json
 import settings
 import os.path
+from scrapy import log
 from pprint import pprint
 from downloadfile import WeipanSpiderUtil
 class WeipanSpiderPipeline(object):
@@ -24,8 +25,12 @@ class DownloadFilePipeline(object):
         self.fingerprints = dict()
 
     def is_ebook(self,item):
-        if int(item['size']) < 100*1024*1024 and str(item['mime_type']).find('pdf')>0 or str(item['mime_type']).find('epub')>0:
+        if int(item['size']) < 100*1024*1024 and \
+                (str(item['mime_type']).lower().find('pdf')>0 or\
+                             str(item['mime_type']).lower().find('epub')>0 or\
+                             str(item['mime_type']).lower().find('doc')>0):
             return True
+        log.msg('invalid ebook '+item['title'],level=log.WARNING)
         return False
 
     def process_item(self, item, spider):
