@@ -24,7 +24,7 @@ import codecs
 import re
 from pprint import pprint
 from ..resource_mgr import resource_mgr
-INPUT_TASK_FILE='./task/task.txt'
+INPUT_TASK_FILE='../task/task.txt'
 #force update
 class WeipanSpider(scrapy.Spider):
     name = "weipanspider"

@@ -23,10 +23,15 @@ class DownloadFilePipeline(object):
         self.util = WeipanSpiderUtil()
         self.fingerprints = dict()
 
+    def is_ebook(self,item):
+        if int(item['size']) < 100*1024*1024 and str(item['mime_type']).find('pdf')>0 or str(item['mime_type']).find('epub')>0:
+            return True
+        return False
+
     def process_item(self, item, spider):
         if item['md5'] not in self.fingerprints:
             localfilename = settings.DOWNLOAD_DIR + item['title']
-            if not os.path.isfile(localfilename):
+            if (not os.path.isfile(localfilename)) and self.is_ebook(item):
                 self.util.download_file(item['url'],filename=localfilename)
             self.fingerprints[item['md5']] = item['title']
         else:
